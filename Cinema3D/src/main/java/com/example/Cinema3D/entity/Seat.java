@@ -3,28 +3,28 @@ package com.example.Cinema3D.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "screenings")
+@Table(
+    name = "seats",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "row_number", "seat_number"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Screening {
+public class Seat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDateTime startTime;
+    @Column(name = "row_number", nullable = false)
+    private int row;
+
+    @Column(name = "seat_number", nullable = false)
+    private int number;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "room_id")
     private CinemaRoom room;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "movie_id")
-    private Movie movie;
 }

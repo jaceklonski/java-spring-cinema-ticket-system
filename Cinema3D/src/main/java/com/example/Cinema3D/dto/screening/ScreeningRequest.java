@@ -1,8 +1,6 @@
 package com.example.Cinema3D.dto.screening;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
 
 public class ScreeningRequest {
@@ -10,8 +8,8 @@ public class ScreeningRequest {
     @NotNull
     private LocalDateTime startTime;
 
-    @NotBlank
-    private String room;
+    @NotNull
+    private Long roomId;
 
     @NotNull
     private Long movieId;
@@ -20,8 +18,8 @@ public class ScreeningRequest {
         return startTime;
     }
 
-    public String getRoom() {
-        return room;
+    public Long getRoomId() {
+        return roomId;
     }
 
     public Long getMovieId() {
@@ -32,8 +30,8 @@ public class ScreeningRequest {
         this.startTime = startTime;
     }
 
-    public void setRoom(String room) {
-        this.room = room;
+    public void setRoomId(Long roomId) {
+        this.roomId = roomId;
     }
 
     public void setMovieId(Long movieId) {

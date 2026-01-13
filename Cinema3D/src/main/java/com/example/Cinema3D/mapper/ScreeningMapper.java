@@ -9,7 +9,8 @@ public class ScreeningMapper {
         return new ScreeningResponse(
                 screening.getId(),
                 screening.getStartTime(),
-                screening.getRoom(),
+                screening.getRoom().getId(),
+                screening.getRoom().getName(),
                 screening.getMovie().getId(),
                 screening.getMovie().getTitle()
         );
