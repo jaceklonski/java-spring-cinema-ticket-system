@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Wybór miejsc</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .screen {
+            text-align: center;
+            margin: 20px auto;
+            padding: 10px;
+            width: 300px;
+            background: #ddd;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .cinema {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .row-label {
+            width: 30px;
+            font-weight: bold;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .seat {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            font-size: 12px;
+            cursor: pointer;
+            background: #e0e0e0;
+        }
+
+        .seat.free {
+            background: #e0e0e0;
+        }
+
+        .seat.reserved {
+            background: #f4c430;
+            cursor: not-allowed;
+        }
+
+        .seat.taken {
+            background: #d9534f;
+            cursor: not-allowed;
+            color: #fff;
+        }
+
+        .seat.selected {
+            background: #5cb85c;
+            color: #fff;
+        }
+
+        .legend {
+            margin-bottom: 20px;
+        }
+
+        .legend span {
+            margin-right: 15px;
+        }
+
+        .actions {
+            margin-top: 20px;
+        }
+
+        button.confirm {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #0066cc;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${screening.movie.title}">Film</h1>
+<p>
+    Seans:
+    <span th:text="${#temporals.format(screening.startTime, 'yyyy-MM-dd HH:mm')}"></span>
+</p>
+
+<div class="screen">EKRAN</div>
+
+<div class="legend">
+    <span>🟩 wybrane</span>
+    <span>⬜ wolne</span>
+    <span>🟨 zarezerwowane</span>
+    <span>🟥 zajęte</span>
+</div>
+
+<div class="cinema">
+
+    <!-- Grupowanie po rzędach -->
+    <div th:each="entry : ${seatsByRow}">
+        <div class="row">
+
+            <div class="row-label"
+                 th:text="${T(java.lang.Character).toString(64 + entry.key)}">
+                A
+            </div>
+
+            <button
+                    th:each="screeningSeat : ${entry.value}"
+                    class="seat"
+                    th:text="${screeningSeat.seat.number}"
+                    th:data-seat-id="${screeningSeat.id}"
+                    th:classappend="${screeningSeat.status.name().toLowerCase()}"
+                    th:disabled="${screeningSeat.status.name() != 'FREE'}"
+                    onclick="toggleSeat(this)">
+            </button>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="actions">
+    <button class="confirm" onclick="finishReservation()">
+        Zakończ rezerwację
+    </button>
+</div>
+
+<script>
+    const selectedSeats = new Set();
+
+    function toggleSeat(button) {
+        const seatId = button.dataset.seatId;
+
+        if (button.classList.contains('selected')) {
+            button.classList.remove('selected');
+            selectedSeats.delete(seatId);
+        } else {
+            button.classList.add('selected');
+            selectedSeats.add(seatId);
+        }
+
+        console.log("Wybrane miejsca:", Array.from(selectedSeats));
+    }
+
+    function finishReservation() {
+        if (selectedSeats.size === 0) {
+            alert("Nie wybrano żadnych miejsc");
+            return;
+        }
+
+        alert(
+            "Wybrane miejsca: " +
+            Array.from(selectedSeats).join(", ")
+        );
+
+        // TU: następny krok -> AJAX POST do backendu
+    }
+</script>
+
+</body>
+</html>

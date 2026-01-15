@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dodaj salę</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+</head>
+<body class="container mt-4">
+
+<h1>Kreator sali kinowej</h1>
+
+<form th:action="@{/admin/rooms}" th:object="${room}" method="post">
+
+    <div class="mb-3">
+        <label>Nazwa sali</label>
+        <input class="form-control" th:field="*{name}">
+        <div class="text-danger" th:errors="*{name}"></div>
+    </div>
+
+    <div class="mb-3">
+        <label>Liczba rzędów</label>
+        <input type="number" class="form-control" th:field="*{rows}">
+        <div class="text-danger" th:errors="*{rows}"></div>
+    </div>
+
+    <div class="mb-3">
+        <label>Miejsc w rzędzie</label>
+        <input type="number" class="form-control" th:field="*{seatsPerRow}">
+        <div class="text-danger" th:errors="*{seatsPerRow}"></div>
+    </div>
+
+    <button class="btn btn-primary">Utwórz salę</button>
+    <a href="/admin/rooms" class="btn btn-secondary">Anuluj</a>
+</form>
+
+</body>
+</html>

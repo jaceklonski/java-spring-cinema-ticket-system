@@ -1,15 +1,12 @@
 package com.example.Cinema3D.service;
 
 import com.example.Cinema3D.dto.screening.ScreeningRequest;
-import com.example.Cinema3D.entity.CinemaRoom;
-import com.example.Cinema3D.entity.Movie;
-import com.example.Cinema3D.entity.Screening;
+import com.example.Cinema3D.entity.*;
 import com.example.Cinema3D.exception.NotFoundException;
-import com.example.Cinema3D.repository.CinemaRoomRepository;
-import com.example.Cinema3D.repository.MovieRepository;
-import com.example.Cinema3D.repository.ScreeningRepository;
+import com.example.Cinema3D.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,8 +17,11 @@ public class ScreeningService {
     private final ScreeningRepository screeningRepository;
     private final MovieRepository movieRepository;
     private final CinemaRoomRepository cinemaRoomRepository;
+    private final ScreeningSeatRepository screeningSeatRepository;
 
+    @Transactional
     public Screening create(ScreeningRequest request) {
+
         Movie movie = movieRepository.findById(request.getMovieId())
                 .orElseThrow(() -> new NotFoundException("Movie not found"));
 
@@ -33,14 +33,27 @@ public class ScreeningService {
         screening.setMovie(movie);
         screening.setRoom(room);
 
-        return screeningRepository.save(screening);
+        Screening saved = screeningRepository.save(screening);
+
+        room.getSeats().forEach(seat -> {
+            ScreeningSeat ss = new ScreeningSeat();
+            ss.setScreening(saved);
+            ss.setSeat(seat);
+            ss.setStatus(SeatStatus.FREE);
+            screeningSeatRepository.save(ss);
+        });
+
+        return saved;
     }
 
+    @Transactional(readOnly = true)
     public List<Screening> getAll() {
         return screeningRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Screening> getByMovie(Long movieId) {
         return screeningRepository.findByMovieId(movieId);
     }
 }
+

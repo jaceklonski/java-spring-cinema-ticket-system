@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Repertuar kina</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .screening {
+            margin-bottom: 10px;
+        }
+        a {
+            text-decoration: none;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Repertuar kina</h1>
+
+<div th:if="${#lists.isEmpty(screenings)}">
+    <p>Brak seansów</p>
+</div>
+
+<div th:each="screening : ${screenings}" class="screening">
+    <strong th:text="${screening.movie.title}">Tytuł filmu</strong>
+    |
+    <span th:text="${#temporals.format(screening.startTime, 'yyyy-MM-dd HH:mm')}">
+        data
+    </span>
+    |
+    <a th:href="@{/cinema/screening/{id}(id=${screening.id})}">
+        Wybierz miejsca
+    </a>
+</div>
+
+</body>
+</html>
