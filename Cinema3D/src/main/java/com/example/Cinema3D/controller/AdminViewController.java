@@ -1,9 +1,8 @@
 package com.example.Cinema3D.controller;
 
+import com.example.Cinema3D.dto.CinemaRoomCreateRequest;
 import com.example.Cinema3D.dto.movie.MovieRequest;
 import com.example.Cinema3D.dto.screening.ScreeningRequest;
-import com.example.Cinema3D.entity.CinemaRoom;
-import com.example.Cinema3D.entity.Movie;
 import com.example.Cinema3D.repository.CinemaRoomRepository;
 import com.example.Cinema3D.repository.MovieRepository;
 import com.example.Cinema3D.repository.ScreeningRepository;
@@ -17,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import com.example.Cinema3D.dto.CinemaRoomCreateRequest;
-
-
 
 @Controller
 @RequiredArgsConstructor
@@ -32,37 +28,6 @@ public class AdminViewController {
     private final ScreeningRepository screeningRepository;
     private final CinemaRoomRepository cinemaRoomRepository;
     private final CinemaRoomService cinemaRoomService;
-
-
-    // ================= MOVIES =================
-
-    @GetMapping("/movies")
-    @Transactional(readOnly = true)
-    public String movies(Model model) {
-        model.addAttribute("movies", movieRepository.findAll());
-        return "admin/movies";
-    }
-
-    @GetMapping("/movies/new")
-    public String newMovieForm(Model model) {
-        model.addAttribute("movie", new MovieRequest());
-        return "admin/movie-form";
-    }
-
-    @PostMapping("/movies")
-    public String createMovie(
-            @Valid @ModelAttribute("movie") MovieRequest movie,
-            BindingResult result
-    ) {
-        if (result.hasErrors()) {
-            return "admin/movie-form";
-        }
-
-        movieService.createMovie(movie);
-        return "redirect:/admin/movies";
-    }
-
-    // ================= SCREENINGS =================
 
     @GetMapping("/screenings")
     @Transactional(readOnly = true)
@@ -96,7 +61,6 @@ public class AdminViewController {
         return "redirect:/admin/screenings";
     }
 
-    // ================= CINEMA ROOMS =================
 
     @GetMapping("/rooms")
     @Transactional(readOnly = true)
@@ -123,5 +87,4 @@ public class AdminViewController {
         cinemaRoomService.createRoom(room);
         return "redirect:/admin/rooms";
     }
-
 }

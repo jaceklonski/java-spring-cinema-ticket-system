@@ -1,175 +1,112 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
 <head>
     <meta charset="UTF-8">
     <title>Wybór miejsc</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        .screen {
-            text-align: center;
-            margin: 20px auto;
-            padding: 10px;
-            width: 300px;
-            background: #ddd;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .cinema {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .row-label {
-            width: 30px;
-            font-weight: bold;
-            text-align: right;
-            margin-right: 10px;
-        }
-
-        .seat {
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            font-size: 12px;
-            cursor: pointer;
-            background: #e0e0e0;
-        }
-
-        .seat.free {
-            background: #e0e0e0;
-        }
-
-        .seat.reserved {
-            background: #f4c430;
-            cursor: not-allowed;
-        }
-
-        .seat.taken {
-            background: #d9534f;
-            cursor: not-allowed;
-            color: #fff;
-        }
-
-        .seat.selected {
-            background: #5cb85c;
-            color: #fff;
-        }
-
-        .legend {
-            margin-bottom: 20px;
-        }
-
-        .legend span {
-            margin-right: 15px;
-        }
-
-        .actions {
-            margin-top: 20px;
-        }
-
-        button.confirm {
-            padding: 10px 20px;
-            font-size: 16px;
-            background: #0066cc;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
 </head>
 <body>
 
-<h1 th:text="${screening.movie.title}">Film</h1>
-<p>
-    Seans:
-    <span th:text="${#temporals.format(screening.startTime, 'yyyy-MM-dd HH:mm')}"></span>
-</p>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand" href="/">Cinema3D</a>
 
-<div class="screen">EKRAN</div>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="/movies">Filmy</a></li>
+            <li class="nav-item"><a class="nav-link" href="/screenings">Seanse</a></li>
+            <li class="nav-item"><a class="nav-link" href="/cart">Koszyk</a></li>
+        </ul>
+    </div>
+</nav>
 
-<div class="legend">
-    <span>🟩 wybrane</span>
-    <span>⬜ wolne</span>
-    <span>🟨 zarezerwowane</span>
-    <span>🟥 zajęte</span>
-</div>
+<section class="container mt-5 mb-5 text-center">
 
-<div class="cinema">
+    <h1 class="mb-4" th:text="${screening.movie.title}"></h1>
+    <p class="text-muted mb-4"
+       th:text="${#temporals.format(screening.startTime, 'yyyy-MM-dd HH:mm')}"></p>
 
-    <!-- Grupowanie po rzędach -->
-    <div th:each="entry : ${seatsByRow}">
-        <div class="row">
+    <!-- EKRAN -->
+    <div class="cinema-screen mb-5">EKRAN</div>
 
-            <div class="row-label"
-                 th:text="${T(java.lang.Character).toString(64 + entry.key)}">
-                A
-            </div>
+    <!-- SALA -->
+    <div class="cinema-hall">
 
-            <button
-                    th:each="screeningSeat : ${entry.value}"
+        <div th:each="entry : ${seatsByRow}" class="seat-row">
+
+            <span class="row-label"
+                  th:text="${T(java.lang.Character).toString(64 + entry.key)}"></span>
+
+            <button type="button"
+                    th:each="ss : ${entry.value}"
+                    th:text="${ss.seat.number}"
+                    th:data-row="${ss.seat.row}"
+                    th:data-seat="${ss.seat.number}"
+                    th:data-status="${ss.status}"
                     class="seat"
-                    th:text="${screeningSeat.seat.number}"
-                    th:data-seat-id="${screeningSeat.id}"
-                    th:classappend="${screeningSeat.status.name().toLowerCase()}"
-                    th:disabled="${screeningSeat.status.name() != 'FREE'}"
-                    onclick="toggleSeat(this)">
+                    th:classappend="
+                        ${ss.status.name() == 'FREE'} ? ' seat-free' :
+                        (${ss.status.name() == 'RESERVED'} ? ' seat-reserved' :
+                         ' seat-sold')
+                    "
+                    th:disabled="${ss.status.name() != 'FREE'}"
+                    onclick="reserveSeat(this)">
             </button>
 
         </div>
     </div>
 
-</div>
+    <!-- CTA -->
+    <div class="mt-5">
+        <a href="/cart" class="btn btn-warning btn-lg">
+            Przejdź do koszyka
+        </a>
+    </div>
 
-<div class="actions">
-    <button class="confirm" onclick="finishReservation()">
-        Zakończ rezerwację
-    </button>
-</div>
+    <!-- LEGENDA -->
+    <div class="legend mt-5">
+        <div><span class="seat seat-free"></span> Wolne</div>
+        <div><span class="seat seat-selected"></span> Wybrane</div>
+        <div><span class="seat seat-reserved"></span> Zarezerwowane</div>
+        <div><span class="seat seat-sold"></span> Zajęte</div>
+    </div>
+
+</section>
 
 <script>
-    const selectedSeats = new Set();
+    async function reserveSeat(btn) {
+        const screeningId = [[${screening.id}]];
+        const row = btn.dataset.row;
+        const number = btn.dataset.seat;
 
-    function toggleSeat(button) {
-        const seatId = button.dataset.seatId;
+        try {
+            const response = await fetch("/api/v1/seats/reserve", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    screeningId,
+                    row,
+                    number
+                })
+            });
 
-        if (button.classList.contains('selected')) {
-            button.classList.remove('selected');
-            selectedSeats.delete(seatId);
-        } else {
-            button.classList.add('selected');
-            selectedSeats.add(seatId);
+            if (!response.ok) {
+                alert("To miejsce zostało już zarezerwowane");
+                return;
+            }
+
+            btn.classList.remove("seat-free");
+            btn.classList.add("seat-selected");
+            btn.disabled = true;
+
+        } catch (err) {
+            alert("Błąd serwera");
         }
-
-        console.log("Wybrane miejsca:", Array.from(selectedSeats));
-    }
-
-    function finishReservation() {
-        if (selectedSeats.size === 0) {
-            alert("Nie wybrano żadnych miejsc");
-            return;
-        }
-
-        alert(
-            "Wybrane miejsca: " +
-            Array.from(selectedSeats).join(", ")
-        );
-
-        // TU: następny krok -> AJAX POST do backendu
     }
 </script>
 

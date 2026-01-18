@@ -20,7 +20,6 @@ public class BookingViewController {
     @PostMapping("/cinema/booking")
     public String book(
             @RequestParam Long screeningId,
-            @RequestParam String customerName,
             @RequestParam String seats
     ) {
 
@@ -34,12 +33,10 @@ public class BookingViewController {
 
         BookingRequest request = new BookingRequest();
         request.setScreeningId(screeningId);
-        request.setCustomerName(customerName);
         request.setSeats(seatDtos);
 
         bookingService.create(request);
 
-        return "redirect:/cinema";
+        return "redirect:/my-bookings";
     }
 }
-

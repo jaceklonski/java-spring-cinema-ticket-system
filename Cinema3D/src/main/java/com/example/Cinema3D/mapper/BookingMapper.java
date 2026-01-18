@@ -11,7 +11,6 @@ public class BookingMapper {
                 booking.getScreening().getId(),
                 booking.getScreening().getMovie().getTitle(),
                 booking.getSeatsCount(),
-                booking.getCustomerName(),
                 booking.getCreatedAt()
         );
     }

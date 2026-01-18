@@ -5,6 +5,7 @@ import com.example.Cinema3D.entity.*;
 import com.example.Cinema3D.exception.NotFoundException;
 import com.example.Cinema3D.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,24 +22,35 @@ public class BookingService {
     private final ScreeningRepository screeningRepository;
     private final SeatRepository seatRepository;
     private final ScreeningSeatRepository screeningSeatRepository;
+    private final UserRepository userRepository;
 
     /**
-     * Tworzenie rezerwacji (sprzedaż biletów)
+     * Finalizacja rezerwacji z DTO (np. API / płatność)
      */
     @Transactional
     public Booking create(BookingRequest request) {
+
+        String username = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         Screening screening = screeningRepository.findById(request.getScreeningId())
                 .orElseThrow(() -> new NotFoundException("Screening not found"));
 
         Booking booking = new Booking();
+        booking.setUser(user);
         booking.setScreening(screening);
-        booking.setCustomerName(request.getCustomerName());
         booking.setCreatedAt(LocalDateTime.now());
+
+        bookingRepository.save(booking);
 
         Set<ScreeningSeat> screeningSeats = request.getSeats().stream()
                 .map(dto -> {
-                    // 1. Znajdź fizyczne miejsce w sali
+
                     Seat seat = seatRepository
                             .findByRoomAndRowAndNumber(
                                     screening.getRoom(),
@@ -46,56 +58,95 @@ public class BookingService {
                                     dto.getNumber()
                             )
                             .orElseThrow(() ->
-                                    new NotFoundException(
-                                            "Seat not found: row=" + dto.getRow()
-                                                    + ", number=" + dto.getNumber()
-                                    ));
+                                    new NotFoundException("Seat not found")
+                            );
 
-                    // 2. Znajdź miejsce przypisane do seansu
-                    ScreeningSeat screeningSeat = screeningSeatRepository
+                    ScreeningSeat ss = screeningSeatRepository
                             .findByScreeningIdAndSeatId(
                                     screening.getId(),
                                     seat.getId()
                             )
                             .orElseThrow(() ->
-                                    new NotFoundException("Seat not assigned to screening"));
+                                    new NotFoundException("Seat not assigned to screening")
+                            );
 
-                    // 3. Sprawdź dostępność
-                    if (screeningSeat.getStatus() != SeatStatus.FREE) {
-                        throw new IllegalStateException(
-                                "Seat already taken: row=" + dto.getRow()
-                                        + ", number=" + dto.getNumber()
-                        );
+                    if (ss.getStatus() != SeatStatus.RESERVED) {
+                        throw new IllegalStateException("Seat not reserved");
                     }
 
-                    // 4. Oznacz jako sprzedane
-                    screeningSeat.setStatus(SeatStatus.SOLD);
-                    screeningSeat.setBooking(booking);
+                    ss.setStatus(SeatStatus.SOLD);
+                    ss.setBooking(booking);
 
-                    return screeningSeat;
+                    return ss;
                 })
                 .collect(Collectors.toSet());
 
-        // zapis rezerwacji
-        bookingRepository.save(booking);
         screeningSeatRepository.saveAll(screeningSeats);
 
         return booking;
     }
 
     /**
-     * Pobranie wszystkich rezerwacji
+     * Finalizacja rezerwacji z koszyka (SESSION)
      */
-    @Transactional(readOnly = true)
-    public List<Booking> getAll() {
-        return bookingRepository.findAll();
+    @Transactional
+    public Booking createFromCart(String username, List<CartItem> items) {
+
+        if (items == null || items.isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        Long screeningId = items.get(0).getScreeningId();
+
+        Screening screening = screeningRepository.findById(screeningId)
+                .orElseThrow(() -> new NotFoundException("Screening not found"));
+
+        Booking booking = new Booking();
+        booking.setUser(user);
+        booking.setScreening(screening);
+        booking.setCreatedAt(LocalDateTime.now());
+
+        bookingRepository.save(booking);
+
+        for (CartItem item : items) {
+
+            ScreeningSeat ss = screeningSeatRepository
+                    .findByScreeningIdAndSeatRowAndSeatNumber(
+                            screeningId,
+                            item.getRow(),
+                            item.getSeat()
+                    )
+                    .orElseThrow(() ->
+                            new NotFoundException("Seat not found")
+                    );
+
+            if (ss.getStatus() != SeatStatus.RESERVED) {
+                throw new IllegalStateException("Seat not reserved");
+            }
+
+            ss.setStatus(SeatStatus.SOLD);
+            ss.setBooking(booking);
+
+            screeningSeatRepository.save(ss);
+        }
+
+        return booking;
     }
 
-    /**
-     * Pobranie rezerwacji dla konkretnego seansu
-     */
     @Transactional(readOnly = true)
-    public List<Booking> getByScreening(Long screeningId) {
-        return bookingRepository.findByScreeningId(screeningId);
+    public List<Booking> getMyBookings() {
+
+        String username = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        return bookingRepository.findByUserOrderByIdDesc(user);
     }
 }

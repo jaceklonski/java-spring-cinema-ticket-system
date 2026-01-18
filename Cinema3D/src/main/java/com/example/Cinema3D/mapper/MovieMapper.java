@@ -1,7 +1,6 @@
 package com.example.Cinema3D.mapper;
 
 import com.example.Cinema3D.dto.movie.MovieRequest;
-import com.example.Cinema3D.dto.movie.MovieResponse;
 import com.example.Cinema3D.entity.Movie;
 
 public class MovieMapper {
@@ -10,14 +9,7 @@ public class MovieMapper {
         Movie movie = new Movie();
         movie.setTitle(request.getTitle());
         movie.setDurationMinutes(request.getDurationMinutes());
+        movie.setDescription(request.getDescription());
         return movie;
-    }
-
-    public static MovieResponse toResponse(Movie movie) {
-        return new MovieResponse(
-                movie.getId(),
-                movie.getTitle(),
-                movie.getDurationMinutes()
-        );
     }
 }

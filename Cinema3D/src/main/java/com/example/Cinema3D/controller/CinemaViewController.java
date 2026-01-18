@@ -5,12 +5,14 @@ import com.example.Cinema3D.entity.ScreeningSeat;
 import com.example.Cinema3D.exception.NotFoundException;
 import com.example.Cinema3D.repository.ScreeningRepository;
 import com.example.Cinema3D.repository.ScreeningSeatRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,8 +37,11 @@ public class CinemaViewController {
     @GetMapping("/cinema/screening/{screeningId}")
     public String screeningSeats(
             @PathVariable Long screeningId,
-            Model model
+            Model model,
+            HttpSession session
     ) {
+        session.setAttribute("SCREENING_ID", screeningId);
+
         Screening screening = screeningRepository.findById(screeningId)
                 .orElseThrow(() -> new NotFoundException("Screening not found"));
 
@@ -47,8 +52,14 @@ public class CinemaViewController {
                 .collect(Collectors.groupingBy(
                         s -> s.getSeat().getRow(),
                         TreeMap::new,
-                        Collectors.toList()
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> list.stream()
+                                        .sorted(Comparator.comparingInt(ss -> ss.getSeat().getNumber()))
+                                        .toList()
+                        )
                 ));
+
 
         model.addAttribute("screening", screening);
         model.addAttribute("seatsByRow", seatsByRow);

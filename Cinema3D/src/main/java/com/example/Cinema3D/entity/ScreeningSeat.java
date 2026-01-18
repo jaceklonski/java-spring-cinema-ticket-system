@@ -1,12 +1,19 @@
 package com.example.Cinema3D.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
 @Table(
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"screening_id", "seat_id"}
-        )
+        name = "screening_seat",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"screening_id", "seat_id"})
+        }
 )
 public class ScreeningSeat {
 
@@ -14,63 +21,36 @@ public class ScreeningSeat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Seans
     @ManyToOne(optional = false)
-    @JoinColumn(name = "screening_id")
+    @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
 
+    // Fizyczne miejsce
     @ManyToOne(optional = false)
-    @JoinColumn(name = "seat_id")
+    @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private SeatStatus status = SeatStatus.FREE;
-
-    /**
-     * Rezerwacja / zakup, do którego należy to miejsce.
-     * NULL = wolne
-     */
+    // Rezerwacja (null = miejsce wolne)
     @ManyToOne
     @JoinColumn(name = "booking_id")
     private Booking booking;
 
-    // ===== GETTERY =====
+    // Kto zarezerwował
+    @ManyToOne
+    @JoinColumn(name = "reserved_by_id")
+    private User reservedBy;
 
-    public Long getId() {
-        return id;
-    }
+    // Status miejsca
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SeatStatus status = SeatStatus.FREE;
 
-    public Screening getScreening() {
-        return screening;
-    }
+    // Kiedy zarezerwowano
+    private LocalDateTime reservedAt;
 
-    public Seat getSeat() {
-        return seat;
-    }
-
-    public SeatStatus getStatus() {
-        return status;
-    }
-
-    public Booking getBooking() {
-        return booking;
-    }
-
-    // ===== SETTERY =====
-
-    public void setScreening(Screening screening) {
-        this.screening = screening;
-    }
-
-    public void setSeat(Seat seat) {
-        this.seat = seat;
-    }
-
-    public void setStatus(SeatStatus status) {
-        this.status = status;
-    }
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
-    }
+    // Typ biletu
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ticket_type")
+    private TicketType ticketType;
 }

@@ -1,7 +1,6 @@
 package com.example.Cinema3D.dto.booking;
 
 import com.example.Cinema3D.dto.seat.SeatDto;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -15,12 +14,6 @@ public class BookingRequest {
     @NotEmpty
     private Set<SeatDto> seats;
 
-    @NotBlank
-    private String customerName;
-
-    public BookingRequest() {
-    }
-
     public Long getScreeningId() {
         return screeningId;
     }
@@ -29,19 +22,11 @@ public class BookingRequest {
         return seats;
     }
 
-    public String getCustomerName() {
-        return customerName;
-    }
-
     public void setScreeningId(Long screeningId) {
         this.screeningId = screeningId;
     }
 
     public void setSeats(Set<SeatDto> seats) {
         this.seats = seats;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
     }
 }

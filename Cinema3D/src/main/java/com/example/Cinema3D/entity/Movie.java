@@ -19,4 +19,10 @@ public class Movie {
     private String title;
 
     private int durationMinutes;
+
+    @Column(length = 2000)
+    private String description;
+
+    @Column(name = "cover_path")
+    private String coverPath;
 }
