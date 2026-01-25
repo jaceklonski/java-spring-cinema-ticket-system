@@ -18,13 +18,36 @@
 
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" href="/admin/movies">Filmy</a></li>
-            <li class="nav-item"><a class="nav-link active" href="/admin/screenings">Seanse</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/rooms">Sale</a></li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/">Strona główna</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/movies">Filmy</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/screenings">Seanse</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/rooms">Sale</a>
+            </li>
         </ul>
+
+        <span class="navbar-text me-3 text-light">
+            Zalogowany jako:
+            <strong th:text="${#authentication.name}"></strong>
+        </span>
+
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-outline-warning btn-sm">
+                Wyloguj
+            </button>
+        </form>
     </div>
 </nav>
-
 <section class="container mt-5" style="max-width: 720px">
 
     <h1 class="mb-4">Dodaj seans</h1>

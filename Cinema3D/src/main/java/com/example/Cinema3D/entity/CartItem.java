@@ -7,11 +7,9 @@ public class CartItem {
     private int seat;
     private TicketType ticketType;
 
-    // ✅ WYMAGANY przez Spring / sesję / settery
     public CartItem() {
     }
 
-    // ✅ WYGODNY konstruktor
     public CartItem(int row, int seat, TicketType ticketType) {
         this.row = row;
         this.seat = seat;

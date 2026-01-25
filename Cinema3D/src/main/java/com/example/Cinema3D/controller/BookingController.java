@@ -22,9 +22,6 @@ public class BookingController {
     private final ScreeningSeatRepository screeningSeatRepository;
     private final UserRepository userRepository;
 
-    // ===============================
-    // FINALIZACJA REZERWACJI
-    // ===============================
     @PostMapping("/confirm")
     @Transactional
     public String confirmBooking(
@@ -67,9 +64,6 @@ public class BookingController {
         return "redirect:/booking/my-bookings";
     }
 
-    // ===============================
-    // MOJE REZERWACJE
-    // ===============================
     @GetMapping("/my-bookings")
     public String myBookings(Model model, Principal principal) {
 

@@ -25,7 +25,6 @@ public class ScreeningViewController {
             @RequestParam(required = false) LocalDate date,
             Model model
     ) {
-        // domyślnie: dzisiaj
         if (date == null) {
             date = LocalDate.now();
         }

@@ -24,9 +24,6 @@ public class BookingService {
     private final ScreeningSeatRepository screeningSeatRepository;
     private final UserRepository userRepository;
 
-    /**
-     * Finalizacja rezerwacji z DTO (np. API / płatność)
-     */
     @Transactional
     public Booking create(BookingRequest request) {
 
@@ -86,9 +83,6 @@ public class BookingService {
         return booking;
     }
 
-    /**
-     * Finalizacja rezerwacji z koszyka (SESSION)
-     */
     @Transactional
     public Booking createFromCart(String username, List<CartItem> items) {
 

@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Cinema3D</title>
@@ -38,20 +40,31 @@
                 <a class="nav-link" href="/my-bookings">Rezerwacje</a>
             </li>
 
-            <li class="nav-item"
-                th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+            <!-- PANEL ADMINA -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                 <a class="nav-link text-primary fw-bold" href="/admin">
                     Panel administratora
                 </a>
             </li>
         </ul>
 
-        <span class="navbar-text me-3">
+        <!-- INFO O ZALOGOWANYM -->
+        <span class="navbar-text me-3" sec:authorize="isAuthenticated()">
             Zalogowany jako:
             <strong th:text="${#authentication.name}"></strong>
         </span>
 
-        <form th:action="@{/logout}" method="post">
+        <!-- LOGIN (gdy NIE zalogowany) -->
+        <a sec:authorize="!isAuthenticated()"
+           href="/login"
+           class="btn btn-outline-light btn-sm me-2">
+            Zaloguj
+        </a>
+
+        <!-- LOGOUT (gdy zalogowany) -->
+        <form sec:authorize="isAuthenticated()"
+              th:action="@{/logout}"
+              method="post">
             <button class="btn btn-outline-light btn-sm">
                 Wyloguj
             </button>
@@ -90,7 +103,7 @@
             <div class="feature-card p-4 h-100">
                 <h3>Filmy</h3>
                 <p class="text-muted mt-3">
-                    Aktualny repertuar, opisy i szczegóły produkcji
+                    Aktualny repertuar, opisy i zwiastuny
                 </p>
                 <a href="/movies" class="btn btn-outline-light btn-sm mt-2">
                     Zobacz filmy

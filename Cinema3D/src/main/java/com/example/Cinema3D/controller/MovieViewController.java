@@ -17,18 +17,12 @@ public class MovieViewController {
     private final MovieRepository movieRepository;
     private final ScreeningRepository screeningRepository;
 
-    // ======================
-    // LISTA FILMÓW
-    // ======================
     @GetMapping
     public String movies(Model model) {
         model.addAttribute("movies", movieRepository.findAll());
         return "movies";
     }
 
-    // ======================
-    // SZCZEGÓŁY FILMU
-    // ======================
     @GetMapping("/{id}")
     public String movieDetails(
             @PathVariable Long id,

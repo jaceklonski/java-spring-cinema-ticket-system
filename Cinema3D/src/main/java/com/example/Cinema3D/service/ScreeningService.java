@@ -51,7 +51,7 @@ public class ScreeningService {
 
         if (!overlapping.isEmpty()) {
             throw new IllegalStateException(
-                    "Screening overlaps with another screening in the same room"
+                    "Another screening already exists in this room during the selected time"
             );
         }
 

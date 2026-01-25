@@ -42,41 +42,36 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                // CSRF wyłączone (fetch + REST)
                 .csrf(csrf -> csrf.disable())
 
-                // AUTORYZACJA
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/reports/**").permitAll()
 
-                        // 🔓 WYJĄTEK: kliknięcie miejsca = rezerwacja
                         .requestMatchers("/api/v1/seats/reserve").permitAll()
 
-                        // PUBLIC
                         .requestMatchers(
-                                "/",
-                                "/cinema/**",
+                                "/movies/**",
+                                "/screenings/**",
                                 "/login",
                                 "/register",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
                                 "/css/**",
-                                "/js/**"
+                                "/js/**",
+                                "/uploads/**"
                         ).permitAll()
 
-                        // ADMIN
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**").hasRole("ADMIN")
 
-                        // USER (RESZTA API)
                         .requestMatchers("/api/v1/**").hasRole("USER")
 
-                        // RESZTA
                         .anyRequest().authenticated()
                 )
 
-                // FORM LOGIN
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/cinema", true)
+                        .defaultSuccessUrl("/", true)
                         .permitAll()
                 )
 

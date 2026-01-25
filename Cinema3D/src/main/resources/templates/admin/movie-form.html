@@ -18,10 +18,34 @@
 
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link active" href="/admin/movies">Filmy</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/screenings">Seanse</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/rooms">Sale</a></li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/">Strona główna</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/movies">Filmy</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/screenings">Seanse</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/rooms">Sale</a>
+            </li>
         </ul>
+
+        <span class="navbar-text me-3 text-light">
+            Zalogowany jako:
+            <strong th:text="${#authentication.name}"></strong>
+        </span>
+
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-outline-warning btn-sm">
+                Wyloguj
+            </button>
+        </form>
     </div>
 </nav>
 
@@ -34,12 +58,14 @@
           method="post"
           enctype="multipart/form-data">
 
+        <!-- TYTUŁ -->
         <div class="mb-3">
             <label class="form-label">Tytuł</label>
             <input class="form-control" th:field="*{title}">
             <div class="text-danger" th:errors="*{title}"></div>
         </div>
 
+        <!-- CZAS TRWANIA -->
         <div class="mb-3">
             <label class="form-label">Czas trwania (min)</label>
             <input type="number" class="form-control"
@@ -47,13 +73,62 @@
             <div class="text-danger" th:errors="*{durationMinutes}"></div>
         </div>
 
+        <!-- GATUNEK -->
+        <div class="mb-3">
+            <label class="form-label">Gatunek</label>
+            <input class="form-control" th:field="*{genre}">
+            <div class="text-danger" th:errors="*{genre}"></div>
+        </div>
+
+        <!-- OGRANICZENIE WIEKOWE -->
+        <div class="mb-3">
+            <label class="form-label">Ograniczenie wiekowe</label>
+            <input class="form-control"
+                   placeholder="np. PG-13, 12+, 18+"
+                   th:field="*{ageRating}">
+            <div class="text-danger" th:errors="*{ageRating}"></div>
+        </div>
+
+        <!-- REŻYSER -->
+        <div class="mb-3">
+            <label class="form-label">Reżyser</label>
+            <input class="form-control" th:field="*{director}">
+            <div class="text-danger" th:errors="*{director}"></div>
+        </div>
+
+        <!-- OBSADA -->
+        <div class="mb-3">
+            <label class="form-label">Obsada (jedna linia = jeden aktor)</label>
+            <textarea class="form-control" rows="4"
+                      th:field="*{actors}">
+            </textarea>
+        </div>
+
+        <!-- ZWIASTUN -->
+        <div class="mb-3">
+            <label class="form-label">Zwiastun (YouTube link)</label>
+            <input class="form-control"
+                   th:field="*{trailerUrl}">
+        </div>
+
+        <!-- GALERIA -->
+        <div class="mb-3">
+            <label class="form-label">Galeria zdjęć (jedna linia = jeden URL)</label>
+            <textarea class="form-control" rows="4"
+                      th:field="*{galleryImages}">
+            </textarea>
+        </div>
+
+        <!-- OPIS -->
         <div class="mb-3">
             <label class="form-label">Opis</label>
             <textarea class="form-control" rows="5"
-                      th:field="*{description}"></textarea>
+                      th:field="*{description}">
+            </textarea>
             <div class="text-danger" th:errors="*{description}"></div>
         </div>
 
+        <!-- OKŁADKA -->
         <div class="mb-4">
             <label class="form-label">Okładka</label>
             <input type="file" class="form-control"

@@ -27,4 +27,12 @@ public class Screening {
     @ManyToOne(optional = false)
     @JoinColumn(name = "movie_id")
     private Movie movie;
+
+    @Transient
+    public LocalDateTime getEndTime() {
+        if (startTime == null || movie == null) {
+            return null;
+        }
+        return startTime.plusMinutes(movie.getDurationMinutes());
+    }
 }

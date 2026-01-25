@@ -10,7 +10,6 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
     <a class="navbar-brand" href="/">Cinema3D</a>
 
@@ -27,73 +26,72 @@
 
     <h1 class="mb-4">Twój koszyk</h1>
 
-    <!-- BRAK MIEJSC -->
     <div th:if="${#lists.isEmpty(items)}" class="alert alert-info">
         Brak zarezerwowanych miejsc.
         <a href="/screenings" class="alert-link">Wróć do repertuaru</a>
     </div>
 
-    <!-- FORMULARZ FINALIZACJI -->
+    <!-- JEDEN FORMULARZ -->
     <form th:if="${!#lists.isEmpty(items)}"
           action="/booking/confirm"
           method="post">
 
-        <!-- bierzemy pierwszy ScreeningSeat tylko do nagłówka -->
         <div class="card mb-4" th:with="firstItem=${items[0]}">
-            <div class="card-body p-0">
+            <div class="card-body p-4">
 
-                <div class="cart-layout">
+                <h3 th:text="${firstItem.screening.movie.title}"></h3>
 
-                    <!-- OKŁADKA FILMU -->
-                    <div class="cart-cover"
-                         th:if="${firstItem.screening.movie.coverPath != null}"
-                         th:style="|background-image: url('/uploads/movies/${firstItem.screening.movie.coverPath}')|">
+                <p class="text-muted mb-4">
+                    Seans:
+                    <span th:text="${#temporals.format(firstItem.screening.startTime, 'yyyy-MM-dd HH:mm')}"></span>
+                </p>
+
+                <div th:each="item : ${items}"
+                     class="d-flex justify-content-between align-items-center border-bottom py-3">
+
+                    <div>
+                        <strong>
+                            Rząd
+                            <span th:text="${T(java.lang.Character).toString(64 + item.seat.row)}"></span>,
+                            miejsce
+                            <span th:text="${item.seat.number}"></span>
+                        </strong>
                     </div>
 
-                    <!-- TREŚĆ -->
-                    <div class="cart-content p-4">
+                    <div class="d-flex gap-2 align-items-center">
 
-                        <h3 th:text="${firstItem.screening.movie.title}"></h3>
+                        <!-- TYP BILETU -->
+                        <select class="form-select w-auto"
+                                name="ticketTypes"
+                                required>
+                            <option value="" disabled selected>
+                                Wybierz typ biletu
+                            </option>
+                            <option th:each="type : ${ticketTypes}"
+                                    th:value="${type}"
+                                    th:text="${type}">
+                            </option>
+                        </select>
 
-                        <p class="text-muted mb-4">
-                            Seans:
-                            <span th:text="${#temporals.format(firstItem.screening.startTime, 'yyyy-MM-dd HH:mm')}"></span>
-                        </p>
+                        <!-- UKRYTE DANE DLA USUWANIA -->
+                        <input type="hidden" name="screeningId" th:value="${item.screening.id}">
+                        <input type="hidden" name="row" th:value="${item.seat.row}">
+                        <input type="hidden" name="seat" th:value="${item.seat.number}">
 
-                        <!-- LISTA MIEJSC -->
-                        <div th:each="item : ${items}"
-                             class="d-flex align-items-center justify-content-between border-bottom py-3">
-
-                            <div>
-                                <strong>
-                                    Rząd
-                                    <span th:text="${T(java.lang.Character).toString(64 + item.seat.row)}"></span>,
-                                    miejsce
-                                    <span th:text="${item.seat.number}"></span>
-                                </strong>
-                            </div>
-
-                            <!-- TYP BILETU -->
-                            <select class="form-select w-auto"
-                                    name="ticketTypes"
-                                    required>
-                                <option value="" disabled selected>
-                                    Wybierz typ biletu
-                                </option>
-                                <option th:each="type : ${ticketTypes}"
-                                        th:value="${type}"
-                                        th:text="${type}">
-                                </option>
-                            </select>
-
-                        </div>
+                        <button type="submit"
+                                class="btn btn-outline-danger btn-sm"
+                                formaction="/cart/remove"
+                                formmethod="post"
+                                formnovalidate>
+                            Usuń
+                        </button>
 
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <!-- CTA -->
         <div class="text-end">
             <button type="submit" class="btn btn-success btn-lg">
                 Potwierdź rezerwację

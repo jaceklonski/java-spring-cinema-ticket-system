@@ -46,4 +46,14 @@ public class Booking {
     public int getSeatsCount() {
         return screeningSeats.size();
     }
+
+    @Transient
+    public String getDisplayId() {
+        if (id == null || createdAt == null) {
+            return null;
+        }
+
+        int year = createdAt.getYear();
+        return String.format("CIN-%d-%06d", year, id);
+    }
 }

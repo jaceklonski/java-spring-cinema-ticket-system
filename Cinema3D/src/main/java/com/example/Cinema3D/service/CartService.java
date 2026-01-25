@@ -44,19 +44,8 @@ public class CartService {
 
         for (int i = 0; i < rows.size(); i++) {
 
-            ScreeningSeat ss = screeningSeatRepository
-                    .findByScreeningIdAndSeatRowAndSeatNumber(
-                            screeningId,
-                            rows.get(i),
-                            seats.get(i)
-                    )
-                    .orElseThrow(() -> new NotFoundException("Seat not found"));
-
             ScreeningSeat locked = screeningSeatRepository
-                    .findForUpdate(
-                            screeningId,
-                            ss.getSeat().getId()
-                    )
+                    .lockSeat(screeningId, rows.get(i), seats.get(i))
                     .orElseThrow(() -> new NotFoundException("Seat not found"));
 
             if (locked.getStatus() != SeatStatus.FREE) {
@@ -76,6 +65,35 @@ public class CartService {
             cart.add(item);
         }
     }
+
+
+    @Transactional
+    public void removeSeat(
+            HttpSession session,
+            Long screeningId,
+            int row,
+            int seatNumber
+    ) {
+        ScreeningSeat locked = screeningSeatRepository
+                .lockSeat(screeningId, row, seatNumber)
+                .orElseThrow(() -> new NotFoundException("Seat not found"));
+
+        if (locked.getStatus() == SeatStatus.RESERVED) {
+            locked.setStatus(SeatStatus.FREE);
+            locked.setReservedAt(null);
+            locked.setReservedBy(null);
+            screeningSeatRepository.save(locked);
+        }
+
+        // JEŻELI JEST W SESJI → USUWAMY, JEŻELI NIE → IGNORUJEMY
+        List<CartItem> cart = getCart(session);
+        cart.removeIf(ci ->
+                ci.getScreeningId().equals(screeningId)
+                        && ci.getRow() == row
+                        && ci.getSeat() == seatNumber
+        );
+    }
+
 
     public void setTicketTypes(List<CartItem> cart, List<TicketType> ticketTypes) {
         if (cart.size() != ticketTypes.size()) {
